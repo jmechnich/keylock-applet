@@ -1,0 +1,6 @@
+/.gitignore
+/Makefile
+/keylock-applet
+/*.o
+/moc_*
+*~
