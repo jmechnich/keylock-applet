@@ -11,7 +11,7 @@ Caps/Num/Scroll Lock indicator applet for X11
 - C++ compiler (i.e. gcc)
 - Qt 4.x
 
-# Screenshot
-![](https://raw.github.com/jmechnich/keylock-applet/master/screens/screen-caps-off.jpg)
-![](https://raw.github.com/jmechnich/keylock-applet/master/screens/screen-caps-on.jpg)
-![](https://raw.github.com/jmechnich/keylock-applet/master/screens/screen-preferences.jpg)
+# Screenshots
+![](https://raw.github.com/jmechnich/keylock-applet/master/screens/screen-caps-off.png)
+![](https://raw.github.com/jmechnich/keylock-applet/master/screens/screen-caps-on.png)
+![](https://raw.github.com/jmechnich/keylock-applet/master/screens/screen-preferences.png)
