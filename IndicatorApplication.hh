@@ -18,7 +18,7 @@ public:
         {
           // initialize general data
           setOrganizationName("mechnich");
-          setApplicationName("indicator-keylock-qt");
+          setApplicationName("keylock-applet");
           setApplicationVersion("1.0");
           setQuitOnLastWindowClosed(false);
           
