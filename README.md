@@ -17,7 +17,7 @@ Caps/Num/Scroll Lock indicator applet for X11, written in C++ and Qt
 #### Applet with all lock keys off
 ![](https://raw.github.com/jmechnich/keylock-applet/master/screens/screen-caps-off.png)
 
-#### Applet with num lock key on
+#### Applet with caps lock key on
 ![](https://raw.github.com/jmechnich/keylock-applet/master/screens/screen-caps-on.png)
 
 #### Preferences window
