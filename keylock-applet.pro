@@ -11,4 +11,4 @@ LIBS += `pkg-config x11 --libs`
 
 # Input
 HEADERS += Indicator.hh IndicatorApplication.hh Preferences.hh SplashScreen.hh
-SOURCES += keylock-applet.cc
+SOURCES += keylock-applet.cc Indicator.cc IndicatorApplication.cc Preferences.cc
