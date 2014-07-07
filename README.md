@@ -1,7 +1,7 @@
 keylock-applet
 ==============
 
-Caps/Num/Scroll Lock indicator applet for X11, written in C++ and Qt
+Caps/Num/Scroll Lock system tray applet for X11, written in C++ and Qt
 
 # Functionality
 - Shows a system tray icon with state of a single or all lock keys
