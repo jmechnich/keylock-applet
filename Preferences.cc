@@ -17,7 +17,7 @@ Preferences::Preferences()
       printf("Error creating QSettings\n");
   
   _map.insert( "prefix",
-               Item( "pixmaps", FolderDialog));
+               Item( "icons", FolderDialog));
   _map.insert( "suffix",
                Item( "png", ComboBox, "png,svg"));
   _map.insert( "show_key",

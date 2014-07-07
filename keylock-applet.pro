@@ -3,12 +3,27 @@
 ######################################################################
 
 TEMPLATE = app
-CONFIG += debug
+#CONFIG += debug
 TARGET = 
 DEPENDPATH += .
 INCLUDEPATH += .
 LIBS += `pkg-config x11 --libs`
 
+isEmpty(PREFIX) {
+  PREFIX = /usr/local
+}
+
+DEFINES += INSTALL_PREFIX=\\\"$$PREFIX\\\"
+
 # Input
 HEADERS += Indicator.hh IndicatorApplication.hh Preferences.hh SplashScreen.hh
 SOURCES += keylock-applet.cc Indicator.cc IndicatorApplication.cc Preferences.cc
+
+target.path = $$PREFIX/bin
+target.files = keylock-applet
+icons.path  = $$PREFIX/share/keylock-applet/icons
+icons.files = icons/*
+config.path = $$PREFIX/share/keylock-applet
+config.files = keylock-applet.conf
+
+INSTALLS += target icons config

@@ -1,5 +1,7 @@
 #include "IndicatorApplication.hh"
 
+#include <QDateTime>
+
 IndicatorApplication::IndicatorApplication( int argc, char** argv)
         : QApplication(argc, argv)
 {
@@ -57,7 +59,9 @@ IndicatorApplication::IndicatorApplication( int argc, char** argv)
             
     sleep(3);
   }
-
+  
+  updatePreferences();
+  
   _i = new Indicator;
 }
 
@@ -78,4 +82,32 @@ IndicatorApplication::setThemeFromGtk() const
       break;
     }
   }
+}
+
+void
+IndicatorApplication::updatePreferences()
+{
+#ifdef INSTALL_PREFIX
+  QFileInfo distFile( QString(INSTALL_PREFIX) + "/share/" +
+                      QApplication::applicationName() + "/" +
+                      QApplication::applicationName() + ".conf");
+  
+  if( !distFile.exists())
+      return;
+  
+  QFileInfo localFile( QDir::homePath() + "/.config/" +
+                       QApplication::organizationName() + "/" +
+                       QApplication::applicationName() +".conf");
+
+  if( localFile.exists() && distFile.lastModified() > localFile.lastModified())
+  {
+    localFile.dir().remove(localFile.fileName());
+    localFile.refresh();
+  }
+  
+  if( !localFile.exists())
+  {
+    QFile::copy( distFile.absoluteFilePath(), localFile.absoluteFilePath());
+  }
+#endif
 }

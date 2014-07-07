@@ -29,6 +29,8 @@ private:
 
   void setThemeFromGtk() const;
 
+  void updatePreferences();
+
   Indicator* _i;
 };
 
