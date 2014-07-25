@@ -2,9 +2,17 @@
 
 #include <QDateTime>
 
+#include <sys/socket.h>
+#include <syslog.h>
+
+int IndicatorApplication::sighupFd[2]  = {0};
+int IndicatorApplication::sigtermFd[2] = {0};
+int IndicatorApplication::sigintFd[2]  = {0};
+
 IndicatorApplication::IndicatorApplication( int argc, char** argv)
         : QApplication(argc, argv)
 {
+  initSignalHandlers();
   setThemeFromGtk();
                     
   // initialize general data
@@ -12,7 +20,25 @@ IndicatorApplication::IndicatorApplication( int argc, char** argv)
   setApplicationName("keylock-applet");
   setApplicationVersion("1.0");
   setQuitOnLastWindowClosed(false);
-          
+
+  abortIfRunning();
+  abortIfNoSystray();
+  
+  updatePreferences();
+  
+  _i = new Indicator;
+
+  connect( this, SIGNAL( aboutToQuit()), this, SLOT( cleanup()));
+}
+
+IndicatorApplication::~IndicatorApplication()
+{
+  delete _i;
+}
+
+void
+IndicatorApplication::abortIfRunning() const
+{
   // abort if application is already running
   QRegExp re( "^\\d+$");
   QDirIterator it("/proc");
@@ -42,7 +68,11 @@ IndicatorApplication::IndicatorApplication( int argc, char** argv)
       }
     }
   }
-          
+}
+
+void
+IndicatorApplication::abortIfNoSystray() const
+{
   // abort if system tray is not available
   int retry = 3;
   while( retry--)
@@ -59,10 +89,6 @@ IndicatorApplication::IndicatorApplication( int argc, char** argv)
             
     sleep(3);
   }
-  
-  updatePreferences();
-  
-  _i = new Indicator;
 }
 
 void
@@ -85,7 +111,7 @@ IndicatorApplication::setThemeFromGtk() const
 }
 
 void
-IndicatorApplication::updatePreferences()
+IndicatorApplication::updatePreferences() const
 {
 #ifdef INSTALL_PREFIX
   QFileInfo distFile( QString(INSTALL_PREFIX) + "/share/" +
@@ -110,4 +136,94 @@ IndicatorApplication::updatePreferences()
     QFile::copy( distFile.absoluteFilePath(), localFile.absoluteFilePath());
   }
 #endif
+}
+
+void
+IndicatorApplication::initSignalHandlers()
+{
+  if (::socketpair(AF_UNIX, SOCK_STREAM, 0, sighupFd))
+      qFatal("Couldn't create HUP socketpair");
+  if (::socketpair(AF_UNIX, SOCK_STREAM, 0, sigtermFd))
+      qFatal("Couldn't create TERM socketpair");
+  if (::socketpair(AF_UNIX, SOCK_STREAM, 0, sigintFd))
+      qFatal("Couldn't create INT socketpair");
+  
+  snHup  = new QSocketNotifier(sighupFd[1],  QSocketNotifier::Read, this);
+  connect(snHup,  SIGNAL(activated(int)), this, SLOT(handleSigHup()));
+  snTerm = new QSocketNotifier(sigtermFd[1], QSocketNotifier::Read, this);
+  connect(snTerm, SIGNAL(activated(int)), this, SLOT(handleSigTerm()));
+  snInt  = new QSocketNotifier(sigintFd[1],  QSocketNotifier::Read, this);
+  connect(snInt,  SIGNAL(activated(int)), this, SLOT(handleSigInt()));
+}
+
+void
+IndicatorApplication::hupSignalHandler(int)
+{
+  char a = 1;
+  ::write(sighupFd[0], &a, sizeof(a));
+}
+
+void
+IndicatorApplication::termSignalHandler(int)
+{
+  char a = 1;
+  ::write(sigtermFd[0], &a, sizeof(a));
+}
+
+void
+IndicatorApplication::intSignalHandler(int)
+{
+  char a = 1;
+  ::write(sigintFd[0], &a, sizeof(a));
+}
+
+void
+IndicatorApplication::handleSigHup() const
+{
+  snHup->setEnabled(false);
+  char tmp;
+  ::read(sighupFd[1], &tmp, sizeof(tmp));
+  
+  syslog(LOG_INFO, "INFO   received SIGHUP");
+  
+  snHup->setEnabled(true);
+}
+
+void
+IndicatorApplication::handleSigTerm() const
+{
+  snTerm->setEnabled(false);
+  char tmp;
+  ::read(sigtermFd[1], &tmp, sizeof(tmp));
+  
+  syslog(LOG_INFO, "INFO   received SIGTERM");
+  
+  snTerm->setEnabled(true);
+}
+
+void
+IndicatorApplication::handleSigInt() const
+{
+  snInt->setEnabled(false);
+  char tmp;
+  ::read(sigintFd[1], &tmp, sizeof(tmp));
+  
+  syslog(LOG_INFO, "INFO   received SIGINT");
+  
+  quit();
+  
+  snInt->setEnabled(true);
+}
+
+void
+IndicatorApplication::cleanup() const
+{
+  syslog( LOG_INFO, "INFO   Shutting down");
+}
+  
+bool
+IndicatorApplication::x11EventFilter( XEvent* ev)
+{
+  _i->x11EventFilter( ev);
+  return false;
 }

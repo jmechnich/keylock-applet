@@ -5,6 +5,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <signal.h>
+#include <syslog.h>
 
 void detach()
 {
@@ -73,28 +74,146 @@ void detach()
   return;
 }
 
+void setLogLevel( int level, bool isDaemon)
+{
+  int option = LOG_PID;
+  if( !isDaemon) option |= LOG_PERROR;
+  
+  openlog("keylock-applet", option, LOG_USER);
+  switch( level)
+  {
+  case 1:
+    setlogmask( LOG_UPTO( LOG_NOTICE));
+    break;
+  case 2:
+    setlogmask( LOG_UPTO( LOG_INFO));
+    break;
+  case 3:
+    setlogmask( LOG_UPTO( LOG_DEBUG));
+    break;
+  default:
+    setlogmask( LOG_UPTO( LOG_WARNING));
+    break;
+  }
+}
+
+void help()
+{
+  printf( "usage: keylock-applet [options]\n");
+  printf( "\n");
+  printf( "  short long         description\n");
+  printf( "  -d    --daemon     start as daemon\n");
+  printf( "  -h    --help       print this help and exit\n");
+  printf( "  -v N  --verbose N  set syslog verbosity level to N.\n");
+  printf( "                     Values of N can be:\n");
+  printf( "                        1  LOG_NOTICE\n");
+  printf( "                        2  LOG_INFO\n");
+  printf( "                        3  LOG_DEBUG\n");
+}
+
 void parseCommandLine( int argc, char** argv)
 {
   bool daemon = false;
-
+  int verbosity = 0;
   int c = 0;
-  while ((c = getopt (argc, argv, "d")) != -1)
-      switch (c)
-      {
-      case 'd':
+  while( true)
+  {
+    static struct option long_options[] =
+        {
+            {"daemon",  no_argument,       0, 'd'},
+            {"help",    no_argument,       0, 'h'},
+            {"verbose", required_argument, 0, 'v'},
+            {0, 0, 0, 0},
+        };
+    
+    int option_index = 0;
+    c = getopt_long (argc, argv, "dhv:", long_options, &option_index);
+    if( c == -1) break;
+    switch (c)
+    {
+    case 0:
+      /* If this option set a flag, do nothing else now. */
+      if (long_options[option_index].flag != 0)
+          break;
+      printf ("option %s", long_options[option_index].name);
+      if (optarg)
+          printf (" with arg %s", optarg);
+      printf ("\n");
+      break;
+    case 'd':
         daemon = true;
+        break;
+      case 'v':
+        verbosity = atoi(optarg);
+        break;
+      case 'h':
+        help();
+        exit(0);
         break;
       default:
         abort();
         break;
-      }
+    }
+  }
+  
 
-  if( daemon) detach();
+  if( daemon)    detach();
+  setLogLevel( verbosity, daemon);
+  
+  if (optind < argc)
+  {
+    printf ("unknown uptions: ");
+    while (optind < argc)
+        printf ("%s ", argv[optind++]);
+    putchar ('\n');
+    help();
+    abort();
+  }
+}
+
+void cleanup()
+{
+  closelog();
+}
+
+static int setupSignalHandlers()
+{
+  struct sigaction hup, term, inta;
+  
+  hup.sa_handler = IndicatorApplication::hupSignalHandler;
+  sigemptyset(&hup.sa_mask);
+  hup.sa_flags = 0;
+  hup.sa_flags |= SA_RESTART;
+  if( sigaction(SIGHUP, &hup, 0) > 0) return 1;
+  
+  term.sa_handler = IndicatorApplication::termSignalHandler;
+  sigemptyset(&term.sa_mask);
+  term.sa_flags = 0;
+  term.sa_flags |= SA_RESTART;
+  if( sigaction(SIGTERM, &term, 0) > 0) return 2;
+  
+  inta.sa_handler = IndicatorApplication::intSignalHandler;
+  sigemptyset(&inta.sa_mask);
+  inta.sa_flags = 0;
+  inta.sa_flags |= SA_RESTART;
+  if( sigaction(SIGINT, &inta, 0) > 0) return 3;
+
+  return 0;
 }
 
 int main(int argc, char** argv)
 {
+  atexit( cleanup);
+
   parseCommandLine(argc, argv);
   IndicatorApplication a(argc, argv);
+
+  if(setupSignalHandlers())
+  {
+    syslog( LOG_ERR, "ERROR  Could not set up signal handlers");
+    return 1;
+  }
+    
+  syslog( LOG_INFO, "INFO   Startup complete");
   return a.exec();
 }

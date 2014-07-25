@@ -1,5 +1,7 @@
 #include "Indicator.hh"
 
+#include <QDesktopWidget>
+
 Indicator::Indicator()
         : QSystemTrayIcon()
         , _p(new Preferences)
@@ -166,6 +168,8 @@ Indicator::initSystray()
 void
 Indicator::x11EventFilter(XEvent* event)
 {
+  if( !event) return;
+  
   XkbEvent* xkbEvent = reinterpret_cast<XkbEvent*>(event);
           
   if (xkbEvent->type == _XkbEventBase + XkbEventCode)
@@ -209,6 +213,7 @@ Indicator::updateIcon()
 void
 Indicator::updateSplash()
 {
+  syslog( LOG_DEBUG, "DEBUG  updateSplash() called");
   bool visible = false;
   QString text;
           
@@ -227,9 +232,11 @@ Indicator::updateSplash()
           
   if( !visible)
   {
+    syslog( LOG_DEBUG, "DEBUG  hiding splash");
     _s->hide();
     return;
   }
+  syslog( LOG_DEBUG, "DEBUG  showing splash");
   _s->setText( text + "ON", _p->value("splash_font").value<QFont>());
   _s->show();
   _s->update();
