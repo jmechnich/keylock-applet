@@ -8,7 +8,6 @@ Indicator::Indicator()
         , _s(new SplashScreen)
         , _states()
         , _win(0)
-        , _icon(QPixmap(22,22))
 {
   initVars();
   initContextMenu();
@@ -20,7 +19,12 @@ Indicator::Indicator()
            this, SLOT(screenSizeChanged(int)));
   initXkbExtension();
   QTimer::singleShot(10, this, SLOT( resetIcon()));
-  _s->show();
+}
+
+Indicator::~Indicator()
+{
+  delete _s;
+  delete _p;
 }
 
 void
@@ -71,7 +75,6 @@ Indicator::initXkbExtension()
   int XkbErrorBase;
           
   _win = QX11Info::display();
-          
   if (!XkbLibraryVersion(&maj, &min))
       return false;
           
@@ -112,6 +115,10 @@ Indicator::iconName( unsigned int key, unsigned int state)
 void
 Indicator::initVars()
 {
+  QPixmap pix(22,22);
+  pix.fill(Qt::black);
+  _icon = QIcon(pix);
+  
   _map.clear();
   _map.insert(CAPS,   Mode("Caps lock",   "CAPS", "caps-lock"));
   _map.insert(NUM,    Mode("Num lock",    "NUM",  "num-lock"));
@@ -150,9 +157,9 @@ Indicator::initContextMenu()
   connect( sm, SIGNAL( mapped( int)), this, SLOT( resetIcon( int)));
   m->addSeparator();
   m->addAction(QIcon::fromTheme("document-properties"), "&Preferences",
-               this, SLOT(preferences()));
+                   this, SLOT(preferences()));
   m->addAction(QIcon::fromTheme("application-exit"), "&Quit",
-               qApp, SLOT(quit()));
+                   qApp, SLOT(quit()));
   setContextMenu(m);
 }
 
@@ -162,20 +169,19 @@ Indicator::initSystray()
   _p->setWindowIcon(_icon);
   setIcon(_icon);
   show();
-          
 }
     
 void
 Indicator::x11EventFilter(XEvent* event)
 {
   if( !event) return;
+  if( event->type != _XkbEventBase + XkbEventCode) return;
   
   XkbEvent* xkbEvent = reinterpret_cast<XkbEvent*>(event);
-          
-  if (xkbEvent->type == _XkbEventBase + XkbEventCode)
-      if (xkbEvent->any.xkb_type == XkbIndicatorStateNotify)
-          emit indicatorsChanged(xkbEvent->indicators.changed,
-                                 xkbEvent->indicators.state);
+  if( xkbEvent->any.xkb_type != XkbIndicatorStateNotify) return;
+  
+  emit indicatorsChanged( xkbEvent->indicators.changed,
+                          xkbEvent->indicators.state);
 }
 
 void
@@ -213,7 +219,9 @@ Indicator::updateIcon()
 void
 Indicator::updateSplash()
 {
-  syslog( LOG_DEBUG, "DEBUG  updateSplash() called");
+  syslog( LOG_DEBUG, "DEBUG  Indicator::updateSplash()");
+  if(!_s) return;
+  
   bool visible = false;
   QString text;
           
@@ -229,11 +237,15 @@ Indicator::updateSplash()
       text += it->longName + " ";
     }
   }
-          
+  
   if( !visible)
   {
-    syslog( LOG_DEBUG, "DEBUG  hiding splash");
-    _s->hide();
+    if(  _s->isVisible())
+    {
+      syslog( LOG_DEBUG, "DEBUG  hiding splash");
+      _s->hide();
+    }
+    
     return;
   }
   syslog( LOG_DEBUG, "DEBUG  showing splash");

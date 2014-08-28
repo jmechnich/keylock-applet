@@ -16,7 +16,7 @@ class IndicatorApplication : public QApplication
   Q_OBJECT
 
 public:
-  IndicatorApplication( int argc, char** argv);
+  IndicatorApplication( int& argc, char** argv);
   
   ~IndicatorApplication();
   
@@ -44,13 +44,13 @@ private:
 
   void initSignalHandlers();
   
-  static int sighupFd[2];
-  static int sigtermFd[2];
-  static int sigintFd[2];
+  static int _sighupFd[2];
+  static int _sigtermFd[2];
+  static int _sigintFd[2];
   
-  QSocketNotifier* snHup;
-  QSocketNotifier* snTerm;
-  QSocketNotifier* snInt;
+  QSocketNotifier* _snHup;
+  QSocketNotifier* _snTerm;
+  QSocketNotifier* _snInt;
   
   Indicator* _i;
 };

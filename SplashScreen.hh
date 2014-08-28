@@ -11,13 +11,14 @@ public:
   SplashScreen();
   void setText( const QString& text, const QFont& font);
   void show();
-  
+  void updateGeometry();
+
 private:
   void paintEvent( QPaintEvent* event);
   
-private:
   QString _text;
   QFont   _font;
+  QColor  _color;
 };
 
 #endif

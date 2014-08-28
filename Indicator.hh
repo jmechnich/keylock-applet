@@ -43,11 +43,7 @@ public:
   };
 
   Indicator();
-
-  ~Indicator()
-        {
-          delete _p;
-        }
+  ~Indicator();
 
 private slots:
   void clickAction( QSystemTrayIcon::ActivationReason)// r)
@@ -77,6 +73,8 @@ private slots:
   bool initXkbExtension();
 
 private:
+  void x11EventFilter(XEvent* event);
+
   QString iconName( unsigned int key, unsigned int state);
   
   void initVars();
@@ -85,8 +83,6 @@ private:
   
   void initSystray();
       
-  void x11EventFilter(XEvent* event);
-  
   void updateIcon();
     
   void updateSplash();
@@ -95,18 +91,18 @@ signals:
   void indicatorsChanged(unsigned int, unsigned int);
   
 private:
-  typedef QMap<unsigned int,Mode> map_type;
+  typedef QMap<unsigned int,Mode>  map_type;
   typedef map_type::const_iterator map_const_iterator;
-  typedef map_type::iterator map_iterator;
+  typedef map_type::iterator       map_iterator;
   map_type _map;
   
-  Preferences* _p;
+  Preferences*  _p;
   SplashScreen* _s;
-  int        _states[3];
-  Display* _win;
-  int _XkbEventBase;
-  QIcon _icon;
-  
+  int           _states[3];
+  Display*      _win;
+  int           _XkbEventBase;
+  QIcon         _icon;
+    
   friend class IndicatorApplication;
 };
 

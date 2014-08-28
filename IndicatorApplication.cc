@@ -5,12 +5,13 @@
 #include <sys/socket.h>
 #include <syslog.h>
 
-int IndicatorApplication::sighupFd[2]  = {0};
-int IndicatorApplication::sigtermFd[2] = {0};
-int IndicatorApplication::sigintFd[2]  = {0};
+int IndicatorApplication::_sighupFd[2]  = {0};
+int IndicatorApplication::_sigtermFd[2] = {0};
+int IndicatorApplication::_sigintFd[2]  = {0};
 
-IndicatorApplication::IndicatorApplication( int argc, char** argv)
+IndicatorApplication::IndicatorApplication( int& argc, char** argv)
         : QApplication(argc, argv)
+        , _i( 0)
 {
   initSignalHandlers();
   setThemeFromGtk();
@@ -27,7 +28,6 @@ IndicatorApplication::IndicatorApplication( int argc, char** argv)
   updatePreferences();
   
   _i = new Indicator;
-
   connect( this, SIGNAL( aboutToQuit()), this, SLOT( cleanup()));
 }
 
@@ -141,78 +141,78 @@ IndicatorApplication::updatePreferences() const
 void
 IndicatorApplication::initSignalHandlers()
 {
-  if (::socketpair(AF_UNIX, SOCK_STREAM, 0, sighupFd))
+  if (::socketpair(AF_UNIX, SOCK_STREAM, 0, _sighupFd))
       qFatal("Couldn't create HUP socketpair");
-  if (::socketpair(AF_UNIX, SOCK_STREAM, 0, sigtermFd))
+  if (::socketpair(AF_UNIX, SOCK_STREAM, 0, _sigtermFd))
       qFatal("Couldn't create TERM socketpair");
-  if (::socketpair(AF_UNIX, SOCK_STREAM, 0, sigintFd))
+  if (::socketpair(AF_UNIX, SOCK_STREAM, 0, _sigintFd))
       qFatal("Couldn't create INT socketpair");
   
-  snHup  = new QSocketNotifier(sighupFd[1],  QSocketNotifier::Read, this);
-  connect(snHup,  SIGNAL(activated(int)), this, SLOT(handleSigHup()));
-  snTerm = new QSocketNotifier(sigtermFd[1], QSocketNotifier::Read, this);
-  connect(snTerm, SIGNAL(activated(int)), this, SLOT(handleSigTerm()));
-  snInt  = new QSocketNotifier(sigintFd[1],  QSocketNotifier::Read, this);
-  connect(snInt,  SIGNAL(activated(int)), this, SLOT(handleSigInt()));
+  _snHup  = new QSocketNotifier(_sighupFd[1],  QSocketNotifier::Read, this);
+  connect(_snHup,  SIGNAL(activated(int)), this, SLOT(handleSigHup()));
+  _snTerm = new QSocketNotifier(_sigtermFd[1], QSocketNotifier::Read, this);
+  connect(_snTerm, SIGNAL(activated(int)), this, SLOT(handleSigTerm()));
+  _snInt  = new QSocketNotifier(_sigintFd[1],  QSocketNotifier::Read, this);
+  connect(_snInt,  SIGNAL(activated(int)), this, SLOT(handleSigInt()));
 }
 
 void
 IndicatorApplication::hupSignalHandler(int)
 {
   char a = 1;
-  ::write(sighupFd[0], &a, sizeof(a));
+  ::write(_sighupFd[0], &a, sizeof(a));
 }
 
 void
 IndicatorApplication::termSignalHandler(int)
 {
   char a = 1;
-  ::write(sigtermFd[0], &a, sizeof(a));
+  ::write(_sigtermFd[0], &a, sizeof(a));
 }
 
 void
 IndicatorApplication::intSignalHandler(int)
 {
   char a = 1;
-  ::write(sigintFd[0], &a, sizeof(a));
+  ::write(_sigintFd[0], &a, sizeof(a));
 }
 
 void
 IndicatorApplication::handleSigHup() const
 {
-  snHup->setEnabled(false);
+  _snHup->setEnabled(false);
   char tmp;
-  ::read(sighupFd[1], &tmp, sizeof(tmp));
+  ::read(_sighupFd[1], &tmp, sizeof(tmp));
   
   syslog(LOG_INFO, "INFO   received SIGHUP");
   
-  snHup->setEnabled(true);
+  _snHup->setEnabled(true);
 }
 
 void
 IndicatorApplication::handleSigTerm() const
 {
-  snTerm->setEnabled(false);
+  _snTerm->setEnabled(false);
   char tmp;
-  ::read(sigtermFd[1], &tmp, sizeof(tmp));
+  ::read(_sigtermFd[1], &tmp, sizeof(tmp));
   
   syslog(LOG_INFO, "INFO   received SIGTERM");
   
-  snTerm->setEnabled(true);
+  _snTerm->setEnabled(true);
 }
 
 void
 IndicatorApplication::handleSigInt() const
 {
-  snInt->setEnabled(false);
+  _snInt->setEnabled(false);
   char tmp;
-  ::read(sigintFd[1], &tmp, sizeof(tmp));
+  ::read(_sigintFd[1], &tmp, sizeof(tmp));
   
   syslog(LOG_INFO, "INFO   received SIGINT");
   
   quit();
   
-  snInt->setEnabled(true);
+  _snInt->setEnabled(true);
 }
 
 void
