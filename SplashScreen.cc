@@ -33,7 +33,6 @@ SplashScreen::show()
 {
   syslog( LOG_DEBUG, "DEBUG  SplashScreen::show");
   updateGeometry();
-  QWidget::show();
 #ifdef Q_WS_X11
   unsigned long data = 0xFFFFFFFF;
   XChangeProperty (QX11Info::display(),
@@ -45,6 +44,7 @@ SplashScreen::show()
                    reinterpret_cast<unsigned char *>(&data), // all desktop
                    1);
 #endif
+  QWidget::show();
   syslog( LOG_DEBUG, "DEBUG  SplashScreen::show END");
 }
 
