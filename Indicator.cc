@@ -91,8 +91,11 @@ Indicator::initXkbExtension()
           
   unsigned int state;
   XkbGetIndicatorState(_win, XkbUseCoreKbd, &state);
-  setIndicators( (1<<4)-1, state);
-          
+  for( int bit = 0; bit < 3; ++bit)
+  {
+    _states[bit] = state & (1 << bit);
+  }
+  
   connect( this, SIGNAL(indicatorsChanged(unsigned int,unsigned int)),
            this, SLOT(setIndicators(unsigned int,unsigned int)));
   return true;
