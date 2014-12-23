@@ -1,11 +1,11 @@
 #include "IndicatorApplication.hh"
 
 #include <getopt.h>
-#include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <signal.h>
 #include <syslog.h>
+#include <cstdio>
 
 void detach()
 {
@@ -162,7 +162,7 @@ void parseCommandLine( int argc, char** argv)
   
   if (optind < argc)
   {
-    printf ("unknown uptions: ");
+    printf ("unknown options: ");
     while (optind < argc)
         printf ("%s ", argv[optind++]);
     putchar ('\n');
@@ -176,31 +176,6 @@ void cleanup()
   closelog();
 }
 
-static int setupSignalHandlers()
-{
-  struct sigaction hup, term, inta;
-  
-  hup.sa_handler = IndicatorApplication::hupSignalHandler;
-  sigemptyset(&hup.sa_mask);
-  hup.sa_flags = 0;
-  hup.sa_flags |= SA_RESTART;
-  if( sigaction(SIGHUP, &hup, 0) > 0) return 1;
-  
-  term.sa_handler = IndicatorApplication::termSignalHandler;
-  sigemptyset(&term.sa_mask);
-  term.sa_flags = 0;
-  term.sa_flags |= SA_RESTART;
-  if( sigaction(SIGTERM, &term, 0) > 0) return 2;
-  
-  inta.sa_handler = IndicatorApplication::intSignalHandler;
-  sigemptyset(&inta.sa_mask);
-  inta.sa_flags = 0;
-  inta.sa_flags |= SA_RESTART;
-  if( sigaction(SIGINT, &inta, 0) > 0) return 3;
-
-  return 0;
-}
-
 int main(int argc, char** argv)
 {
   atexit( cleanup);
@@ -208,12 +183,6 @@ int main(int argc, char** argv)
   parseCommandLine(argc, argv);
   IndicatorApplication a(argc, argv);
 
-  if(setupSignalHandlers())
-  {
-    syslog( LOG_ERR, "ERROR  Could not set up signal handlers");
-    return 1;
-  }
-    
   syslog( LOG_INFO, "INFO   Startup complete");
   return a.exec();
 }

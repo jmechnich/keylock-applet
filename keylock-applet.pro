@@ -16,8 +16,8 @@ isEmpty(PREFIX) {
 DEFINES += INSTALL_PREFIX=\\\"$$PREFIX\\\"
 
 # Input
-HEADERS += Indicator.hh IndicatorApplication.hh Preferences.hh SplashScreen.hh
-SOURCES += keylock-applet.cc Indicator.cc IndicatorApplication.cc Preferences.cc SplashScreen.cc
+HEADERS += Indicator.hh IndicatorApplication.hh Preferences.hh Signal.hh SplashScreen.hh
+SOURCES += keylock-applet.cc Indicator.cc IndicatorApplication.cc Preferences.cc Signal.cc SplashScreen.cc
 
 target.path = $$PREFIX/bin
 target.files = keylock-applet

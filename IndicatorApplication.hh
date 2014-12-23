@@ -2,14 +2,8 @@
 #define INDICATORAPPLICATION
 
 #include <QApplication>
-#include <QMessageBox>
-#include <QDirIterator>
-#include <QApplication>
-#include <QSocketNotifier>
 
-#include "Indicator.hh"
-
-#include <unistd.h>
+class Indicator;
 
 class IndicatorApplication : public QApplication
 {
@@ -17,20 +11,10 @@ class IndicatorApplication : public QApplication
 
 public:
   IndicatorApplication( int& argc, char** argv);
-  
   ~IndicatorApplication();
-  
-  static void hupSignalHandler(int);
-  static void termSignalHandler(int);
-  static void intSignalHandler(int);
 
-public slots:
-  // Qt signal handlers.
-  void handleSigHup() const;
-  void handleSigTerm() const;
-  void handleSigInt() const;
-  
 private slots:
+  void handleSignal(int signum);
   void cleanup() const;
 
 private:
@@ -43,14 +27,6 @@ private:
   void updatePreferences() const;
 
   void initSignalHandlers();
-  
-  static int _sighupFd[2];
-  static int _sigtermFd[2];
-  static int _sigintFd[2];
-  
-  QSocketNotifier* _snHup;
-  QSocketNotifier* _snTerm;
-  QSocketNotifier* _snInt;
   
   Indicator* _i;
 };

@@ -1,13 +1,13 @@
 #include "IndicatorApplication.hh"
 
+#include "Indicator.hh"
+#include "Signal.hh"
+
+#include <QMessageBox>
+#include <QDirIterator>
 #include <QDateTime>
 
-#include <sys/socket.h>
 #include <syslog.h>
-
-int IndicatorApplication::_sighupFd[2]  = {0};
-int IndicatorApplication::_sigtermFd[2] = {0};
-int IndicatorApplication::_sigintFd[2]  = {0};
 
 IndicatorApplication::IndicatorApplication( int& argc, char** argv)
         : QApplication(argc, argv)
@@ -139,83 +139,6 @@ IndicatorApplication::updatePreferences() const
 }
 
 void
-IndicatorApplication::initSignalHandlers()
-{
-  if (::socketpair(AF_UNIX, SOCK_STREAM, 0, _sighupFd))
-      qFatal("Couldn't create HUP socketpair");
-  if (::socketpair(AF_UNIX, SOCK_STREAM, 0, _sigtermFd))
-      qFatal("Couldn't create TERM socketpair");
-  if (::socketpair(AF_UNIX, SOCK_STREAM, 0, _sigintFd))
-      qFatal("Couldn't create INT socketpair");
-  
-  _snHup  = new QSocketNotifier(_sighupFd[1],  QSocketNotifier::Read, this);
-  connect(_snHup,  SIGNAL(activated(int)), this, SLOT(handleSigHup()));
-  _snTerm = new QSocketNotifier(_sigtermFd[1], QSocketNotifier::Read, this);
-  connect(_snTerm, SIGNAL(activated(int)), this, SLOT(handleSigTerm()));
-  _snInt  = new QSocketNotifier(_sigintFd[1],  QSocketNotifier::Read, this);
-  connect(_snInt,  SIGNAL(activated(int)), this, SLOT(handleSigInt()));
-}
-
-void
-IndicatorApplication::hupSignalHandler(int)
-{
-  char a = 1;
-  ::write(_sighupFd[0], &a, sizeof(a));
-}
-
-void
-IndicatorApplication::termSignalHandler(int)
-{
-  char a = 1;
-  ::write(_sigtermFd[0], &a, sizeof(a));
-}
-
-void
-IndicatorApplication::intSignalHandler(int)
-{
-  char a = 1;
-  ::write(_sigintFd[0], &a, sizeof(a));
-}
-
-void
-IndicatorApplication::handleSigHup() const
-{
-  _snHup->setEnabled(false);
-  char tmp;
-  ::read(_sighupFd[1], &tmp, sizeof(tmp));
-  
-  syslog(LOG_INFO, "INFO   received SIGHUP");
-  
-  _snHup->setEnabled(true);
-}
-
-void
-IndicatorApplication::handleSigTerm() const
-{
-  _snTerm->setEnabled(false);
-  char tmp;
-  ::read(_sigtermFd[1], &tmp, sizeof(tmp));
-  
-  syslog(LOG_INFO, "INFO   received SIGTERM");
-  
-  _snTerm->setEnabled(true);
-}
-
-void
-IndicatorApplication::handleSigInt() const
-{
-  _snInt->setEnabled(false);
-  char tmp;
-  ::read(_sigintFd[1], &tmp, sizeof(tmp));
-  
-  syslog(LOG_INFO, "INFO   received SIGINT");
-  
-  quit();
-  
-  _snInt->setEnabled(true);
-}
-
-void
 IndicatorApplication::cleanup() const
 {
   syslog( LOG_INFO, "INFO   Shutting down");
@@ -226,4 +149,29 @@ IndicatorApplication::x11EventFilter( XEvent* ev)
 {
   _i->x11EventFilter( ev);
   return false;
+}
+
+void
+IndicatorApplication::initSignalHandlers()
+{
+  const int sigs[] = {SIGINT,SIGTERM,SIGUSR1,SIGUSR2};
+  for( size_t i=0; i < sizeof(sigs)/sizeof(sigs[0]); ++i)
+  {
+  syslog( LOG_DEBUG, (std::string("DEBUG  Registering handler for ") + sys_siglist[sigs[i]]).c_str());
+    connect( Signal::create(sigs[i], this), SIGNAL(signal(int)),
+             this, SLOT(handleSignal(int)));
+  }
+}
+
+void
+IndicatorApplication::handleSignal(int signum)
+{
+  syslog( LOG_INFO, (std::string("INFO   Received ") + sys_siglist[signum]).c_str());
+  switch(signum)
+  {
+  case(SIGINT):
+  case(SIGTERM):
+    quit();
+    break;
+  }
 }
