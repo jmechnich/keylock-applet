@@ -1,59 +1,20 @@
 #include "Indicator.hh"
 
-#include <X11/XKBlib.h>
-
 #include <QDesktopWidget>
 
-#include <QAbstractNativeEventFilter>
+#include "EventFilter.hh"
 
-#include <iostream>
-
-class EventFilter : public QAbstractNativeEventFilter
-{
-public:
-  bool nativeEventFilter(const QByteArray &eventType, void* message,
-                         long* /* result */)
-  {
-    auto e(static_cast<const xcb_client_message_event_t*>(message));
-    switch (e->response_type & ~0x80) {
-    case XCB_BUTTON_PRESS:
-    {
-      /* Handle the ButtonPress event type */
-      std::cout << "Button Press" << std::endl;
-      xcb_button_press_event_t *ev = (xcb_button_press_event_t *)e;
-      break;
-    }
-    case XCB_KEY_PRESS:
-    {
-      /* Handle the ButtonPress event type */
-      std::cout << "Key Press" << std::endl;
-      xcb_key_press_event_t *ev = (xcb_key_press_event_t *)e;
-      break;
-    }
-    case XCB_KEY_RELEASE:
-    {
-      /* Handle the ButtonPress event type */
-      std::cout << "Key Release" << std::endl;
-      xcb_key_release_event_t *ev = (xcb_key_release_event_t *)e;
-      break;
-    }
-    default:
-      std::cout << std::hex << int(e->response_type & ~0x80) << std::endl;
-      break;
-    }
-    return false;
-  }
-
-  static EventFilter instance;
-};
-EventFilter EventFilter::instance;
+#include <X11/XKBlib.h>
 
 Indicator::Indicator()
         : QSystemTrayIcon()
         , _p(new Preferences)
         , _s(new SplashScreen)
         , _states()
-        , _win(0)
+        , _win(QX11Info::display())
+        , _eventFilter(new EventFilter(_win))
+
+
 {
   initVars();
   initContextMenu();
@@ -120,7 +81,6 @@ Indicator::initXkbExtension()
   int min = XkbMinorVersion;
   int XkbErrorBase;
 
-  _win = QX11Info::display();
   if (!XkbLibraryVersion(&maj, &min))
       return false;
 
@@ -142,7 +102,7 @@ Indicator::initXkbExtension()
     _states[bit] = state & (1 << bit);
   }
 
-  connect( this, SIGNAL(indicatorsChanged(unsigned int,unsigned int)),
+  connect( _eventFilter, SIGNAL(indicatorsChanged(unsigned int,unsigned int)),
            this, SLOT(setIndicators(unsigned int,unsigned int)));
   return true;
 }
@@ -222,7 +182,7 @@ Indicator::initSystray()
 
 QAbstractNativeEventFilter* Indicator::eventFilter()
 {
-  return &EventFilter::instance;
+  return _eventFilter;
 }
 
 void

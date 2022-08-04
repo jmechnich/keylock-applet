@@ -15,6 +15,7 @@
 #include "SplashScreen.hh"
 
 class QAbstractNativeEventFilter;
+class EventFilter;
 
 class Indicator : public QSystemTrayIcon
 {
@@ -102,6 +103,8 @@ private:
   Display*      _win;
   int           _XkbEventBase;
   QIcon         _icon;
+
+  EventFilter*  _eventFilter;
 
   friend class IndicatorApplication;
 };

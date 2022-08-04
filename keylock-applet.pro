@@ -4,9 +4,13 @@
 
 TEMPLATE = app
 #CONFIG += debug
+CONFIG += link_pkgconfig
 TARGET = keylock-applet
 INCLUDEPATH += .
-LIBS += `pkg-config x11 --libs`
+PKGCONFIG += x11 x11-xcb xcb-xinput xcb-xkb
+CONFIG(debug, debug|release) {
+  PKGCONFIG += xcb-util
+}
 QT += widgets x11extras
 
 isEmpty(PREFIX) {
@@ -23,12 +27,14 @@ DEFINES += INSTALL_PREFIX=\\\"$$PREFIX\\\"
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 # Input
-HEADERS += Indicator.hh \
+HEADERS += EventFilter.hh \
+           Indicator.hh \
            IndicatorApplication.hh \
            Preferences.hh \
            Signal.hh \
            SplashScreen.hh
-SOURCES += Indicator.cc \
+SOURCES += EventFilter.cc \
+           Indicator.cc \
            IndicatorApplication.cc \
            keylock-applet.cc \
            Preferences.cc \
