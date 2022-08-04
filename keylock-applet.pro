@@ -41,6 +41,9 @@ SOURCES += src/EventFilter.cc \
            src/Signal.cc \
            src/SplashScreen.cc
 
+OBJECTS_DIR = tmp
+MOC_DIR = tmp
+
 target.path = $$PREFIX/bin
 target.files = keylock-applet
 icons.path  = $$PREFIX/share/keylock-applet/icons

@@ -2,6 +2,5 @@
 /.qmake.stash
 /Makefile
 /keylock-applet
-/*.o
-/moc_*
+/tmp/
 *~
