@@ -3,7 +3,7 @@
 #include <QApplication>
 #include <QPaintEvent>
 #include <QPainter>
-#include <QDesktopWidget>
+#include <QScreen>
 
 #ifdef Q_WS_X11
 #include <QX11Info>
@@ -67,7 +67,7 @@ SplashScreen::updateGeometry()
   QRect fr(fm.boundingRect(_text));
   int margin = 2, spacing=20;
   int w = fr.width()+2*spacing, h = fr.height()+2*spacing;
-  QRect sr( QApplication::desktop()->availableGeometry());
+  QRect sr( QApplication::primaryScreen()->availableGeometry());
   int l=sr.width()-w-margin, t=sr.top()+margin;
   setGeometry( l, t, w, h);
   syslog( LOG_DEBUG, "DEBUG  SplashScreen::updateGeometry(): %d, %d, %d, %d",
