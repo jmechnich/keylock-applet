@@ -1,6 +1,52 @@
 #include "Indicator.hh"
 
+#include <X11/XKBlib.h>
+
 #include <QDesktopWidget>
+
+#include <QAbstractNativeEventFilter>
+
+#include <iostream>
+
+class EventFilter : public QAbstractNativeEventFilter
+{
+public:
+  bool nativeEventFilter(const QByteArray &eventType, void* message,
+                         long* /* result */)
+  {
+    auto e(static_cast<const xcb_client_message_event_t*>(message));
+    switch (e->response_type & ~0x80) {
+    case XCB_BUTTON_PRESS:
+    {
+      /* Handle the ButtonPress event type */
+      std::cout << "Button Press" << std::endl;
+      xcb_button_press_event_t *ev = (xcb_button_press_event_t *)e;
+      break;
+    }
+    case XCB_KEY_PRESS:
+    {
+      /* Handle the ButtonPress event type */
+      std::cout << "Key Press" << std::endl;
+      xcb_key_press_event_t *ev = (xcb_key_press_event_t *)e;
+      break;
+    }
+    case XCB_KEY_RELEASE:
+    {
+      /* Handle the ButtonPress event type */
+      std::cout << "Key Release" << std::endl;
+      xcb_key_release_event_t *ev = (xcb_key_release_event_t *)e;
+      break;
+    }
+    default:
+      std::cout << std::hex << int(e->response_type & ~0x80) << std::endl;
+      break;
+    }
+    return false;
+  }
+
+  static EventFilter instance;
+};
+EventFilter EventFilter::instance;
 
 Indicator::Indicator()
         : QSystemTrayIcon()
@@ -65,7 +111,7 @@ Indicator::setIndicators(unsigned int changed, unsigned int state)
   else
       updateSplash();
 }
-  
+
 bool
 Indicator::initXkbExtension()
 {
@@ -73,29 +119,29 @@ Indicator::initXkbExtension()
   int maj = XkbMajorVersion;
   int min = XkbMinorVersion;
   int XkbErrorBase;
-          
+
   _win = QX11Info::display();
   if (!XkbLibraryVersion(&maj, &min))
       return false;
-          
+
   if (!XkbQueryExtension(_win, &code, &_XkbEventBase, &XkbErrorBase,
                          &maj, &min))
       return false;
-          
+
   if (!XkbUseExtension(_win, &maj, &min))
       return false;
-          
+
   if (!XkbSelectEvents(_win, XkbUseCoreKbd, XkbIndicatorStateNotifyMask,
                        XkbIndicatorStateNotifyMask))
       return false;
-          
+
   unsigned int state;
   XkbGetIndicatorState(_win, XkbUseCoreKbd, &state);
   for( int bit = 0; bit < 3; ++bit)
   {
     _states[bit] = state & (1 << bit);
   }
-  
+
   connect( this, SIGNAL(indicatorsChanged(unsigned int,unsigned int)),
            this, SLOT(setIndicators(unsigned int,unsigned int)));
   return true;
@@ -111,7 +157,7 @@ Indicator::iconName( unsigned int key, unsigned int state)
 
   if(state) ret += "-on";
   else      ret += "-off";
-          
+
   return ret;
 }
 
@@ -121,14 +167,14 @@ Indicator::initVars()
   QPixmap pix(22,22);
   pix.fill(Qt::black);
   _icon = QIcon(pix);
-  
+
   _map.clear();
   _map.insert(CAPS,   Mode("Caps lock",   "CAPS", "caps-lock"));
   _map.insert(NUM,    Mode("Num lock",    "NUM",  "num-lock"));
   _map.insert(SCROLL, Mode("Scroll lock", "SCRL", "scroll-lock"));
   _map.insert(ANY,    Mode("All",         "",     ""));
 }
-  
+
 void
 Indicator::initContextMenu()
 {
@@ -142,7 +188,7 @@ Indicator::initContextMenu()
   {
     it = _map.find(i);
     if( it == _map.end()) continue;
-            
+
     // a = m->addAction(QIcon::fromTheme(mode.iconName+"-off"),
     //                  mode.longName);
     // QIcon icon;
@@ -173,18 +219,10 @@ Indicator::initSystray()
   setIcon(_icon);
   show();
 }
-    
-void
-Indicator::x11EventFilter(XEvent* event)
+
+QAbstractNativeEventFilter* Indicator::eventFilter()
 {
-  if( !event) return;
-  if( event->type != _XkbEventBase + XkbEventCode) return;
-  
-  XkbEvent* xkbEvent = reinterpret_cast<XkbEvent*>(event);
-  if( xkbEvent->any.xkb_type != XkbIndicatorStateNotify) return;
-  
-  emit indicatorsChanged( xkbEvent->indicators.changed,
-                          xkbEvent->indicators.state);
+  return &EventFilter::instance;
 }
 
 void
@@ -204,7 +242,7 @@ Indicator::updateIcon()
   {
     it = _map.find(i);
     if( it == _map.end()) continue;
-            
+
     QRect r( 0, 0, segh, segw);
     p.fillRect( r, _states[i] ? fgColor : bgColor);
     p.setPen( _states[i] ? bgColor : fgColor);
@@ -218,29 +256,29 @@ Indicator::updateIcon()
   p.end();
   _icon = QIcon(pix);
 }
-  
+
 void
 Indicator::updateSplash()
 {
   syslog( LOG_DEBUG, "DEBUG  Indicator::updateSplash()");
   if(!_s) return;
-  
+
   bool visible = false;
   QString text;
-          
+
   map_const_iterator it;
   for( int i=0; i<ANY; ++i)
   {
     it = _map.find(i);
     if( it == _map.end()) continue;
-                        
+
     if( _states[i])
     {
       visible = true;
       text += it->longName + " ";
     }
   }
-  
+
   if( !visible)
   {
     if(  _s->isVisible())
@@ -248,7 +286,7 @@ Indicator::updateSplash()
       syslog( LOG_DEBUG, "DEBUG  hiding splash");
       _s->hide();
     }
-    
+
     return;
   }
   syslog( LOG_DEBUG, "DEBUG  showing splash");

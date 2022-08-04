@@ -15,7 +15,7 @@ IndicatorApplication::IndicatorApplication( int& argc, char** argv)
 {
   initSignalHandlers();
   setThemeFromGtk();
-                    
+
   // initialize general data
   setOrganizationName("mechnich");
   setApplicationName("keylock-applet");
@@ -24,10 +24,12 @@ IndicatorApplication::IndicatorApplication( int& argc, char** argv)
 
   abortIfRunning();
   abortIfNoSystray();
-  
+
   updatePreferences();
-  
+
   _i = new Indicator;
+  installNativeEventFilter(_i->eventFilter());
+
   connect( this, SIGNAL( aboutToQuit()), this, SLOT( cleanup()));
 }
 
@@ -50,7 +52,7 @@ IndicatorApplication::abortIfRunning() const
     {
       if( it.fileName().toInt() == getpid())
           continue;
-              
+
       QFile file(QString(it.filePath() + "/cmdline"));
       if( !file.open(QIODevice::ReadOnly))
       {
@@ -79,14 +81,14 @@ IndicatorApplication::abortIfNoSystray() const
   {
     if( Indicator::isSystemTrayAvailable())
         break;
-            
+
     if( !retry)
     {
       QMessageBox::critical(
           0, applicationName(), "System tray not available");
       abort();
     }
-            
+
     sleep(3);
   }
 }
@@ -95,7 +97,7 @@ void
 IndicatorApplication::setThemeFromGtk() const
 {
   QFile f(QDir::homePath() + "/.gtkrc-2.0");
-  
+
   if( !f.open(QIODevice::ReadOnly | QIODevice::Text))
       return;
   while( !f.atEnd())
@@ -117,10 +119,10 @@ IndicatorApplication::updatePreferences() const
   QFileInfo distFile( QString(INSTALL_PREFIX) + "/share/" +
                       QApplication::applicationName() + "/" +
                       QApplication::applicationName() + ".conf");
-  
+
   if( !distFile.exists())
       return;
-  
+
   QFileInfo localFile( QDir::homePath() + "/.config/" +
                        QApplication::organizationName() + "/" +
                        QApplication::applicationName() +".conf");
@@ -130,7 +132,7 @@ IndicatorApplication::updatePreferences() const
     localFile.dir().remove(localFile.fileName());
     localFile.refresh();
   }
-  
+
   if( !localFile.exists())
   {
     QFile::copy( distFile.absoluteFilePath(), localFile.absoluteFilePath());
@@ -142,13 +144,6 @@ void
 IndicatorApplication::cleanup() const
 {
   syslog( LOG_INFO, "INFO   Shutting down");
-}
-  
-bool
-IndicatorApplication::x11EventFilter( XEvent* ev)
-{
-  _i->x11EventFilter( ev);
-  return false;
 }
 
 void

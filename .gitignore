@@ -1,4 +1,5 @@
 /.gitignore
+/.qmake.stash
 /Makefile
 /keylock-applet
 /*.o

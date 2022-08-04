@@ -1,5 +1,5 @@
-#ifndef INDICATORAPPLICATION
-#define INDICATORAPPLICATION
+#ifndef INDICATORAPPLICATION_HH
+#define INDICATORAPPLICATION_HH
 
 #include <QApplication>
 
@@ -18,17 +18,15 @@ private slots:
   void cleanup() const;
 
 private:
-  bool x11EventFilter( XEvent* ev);
-
   void setThemeFromGtk() const;
   void abortIfRunning() const;
   void abortIfNoSystray() const;
-  
+
   void updatePreferences() const;
 
   void initSignalHandlers();
-  
+
   Indicator* _i;
 };
 
-#endif
+#endif // INDICATORAPPLICATION_HH

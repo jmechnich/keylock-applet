@@ -14,7 +14,7 @@
 #include "Preferences.hh"
 #include "SplashScreen.hh"
 
-#include <X11/XKBlib.h>
+class QAbstractNativeEventFilter;
 
 class Indicator : public QSystemTrayIcon
 {
@@ -26,12 +26,12 @@ class Indicator : public QSystemTrayIcon
     QString shortName;
     QString iconName;
     QAction* action;
-        
+
     Mode( const QString& l, const QString& s, const QString& i)
             : longName( l), shortName( s), iconName( i), action(0)
           {}
   };
-  
+
 public:
   enum
   {
@@ -50,14 +50,14 @@ private slots:
         {
           // printf( "clickAction: %d\n", r);
         }
-  
+
   void screenSizeChanged( int /*screen*/)
         {
-          QTimer::singleShot(1000, this, SLOT( resetIcon()));
+          QTimer::singleShot(2000, this, SLOT( resetIcon()));
         }
-  
+
   void resetIcon();
-  
+
   void resetIcon( int type)
         {
           _p->setValue("show_key", type);
@@ -68,41 +68,41 @@ private slots:
         {
           _p->show();
         }
-  
+
   void setIndicators(unsigned int changed, unsigned int state);
   bool initXkbExtension();
 
 private:
-  void x11EventFilter(XEvent* event);
+  QAbstractNativeEventFilter* eventFilter();
 
   QString iconName( unsigned int key, unsigned int state);
-  
+
   void initVars();
-    
+
   void initContextMenu();
-  
+
   void initSystray();
-      
+
   void updateIcon();
-    
+
   void updateSplash();
-    
+
 signals:
   void indicatorsChanged(unsigned int, unsigned int);
-  
+
 private:
   typedef QMap<unsigned int,Mode>  map_type;
   typedef map_type::const_iterator map_const_iterator;
   typedef map_type::iterator       map_iterator;
   map_type _map;
-  
+
   Preferences*  _p;
   SplashScreen* _s;
   int           _states[3];
   Display*      _win;
   int           _XkbEventBase;
   QIcon         _icon;
-    
+
   friend class IndicatorApplication;
 };
 
