@@ -10,7 +10,7 @@ class IndicatorApplication : public QApplication
   Q_OBJECT
 
 public:
-  IndicatorApplication( int& argc, char** argv);
+  IndicatorApplication(int& argc, char** argv);
   ~IndicatorApplication();
 
 private slots:

@@ -28,8 +28,11 @@ class Indicator : public QSystemTrayIcon
     QString iconName;
     QAction* action;
 
-    Mode( const QString& l, const QString& s, const QString& i)
-            : longName( l), shortName( s), iconName( i), action(0)
+    Mode(const QString& l, const QString& s, const QString& i)
+            : longName(l)
+            , shortName(s)
+            , iconName(i)
+            , action(0)
           {}
   };
 
@@ -47,19 +50,19 @@ public:
   ~Indicator();
 
 private slots:
-  void clickAction( QSystemTrayIcon::ActivationReason)// r)
+  void clickAction(QSystemTrayIcon::ActivationReason)// r)
         {
-          // printf( "clickAction: %d\n", r);
+          // printf("clickAction: %d\n", r);
         }
 
-  void screenSizeChanged( int /*screen*/)
+  void screenSizeChanged(int /*screen*/)
         {
-          QTimer::singleShot(2000, this, SLOT( resetIcon()));
+          QTimer::singleShot(2000, this, SLOT(resetIcon()));
         }
 
   void resetIcon();
 
-  void resetIcon( int type)
+  void resetIcon(int type)
         {
           _p->setValue("show_key", type);
           resetIcon();
@@ -76,7 +79,7 @@ private slots:
 private:
   QAbstractNativeEventFilter* eventFilter();
 
-  QString iconName( unsigned int key, unsigned int state);
+  QString iconName(unsigned int key, unsigned int state);
 
   void initVars();
 

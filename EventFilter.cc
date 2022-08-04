@@ -112,7 +112,7 @@ EventFilter::initXkb()
 {
   const xcb_query_extension_reply_t *reply =
       xcb_get_extension_data(_xcbConnection, &xcb_xkb_id);
-  if(!reply || !reply->present) {
+  if (!reply || !reply->present) {
     syslog(
         LOG_DEBUG, "DEBUG  XKEYBOARD extension is not present on the X server");
     return false;
@@ -135,7 +135,7 @@ EventFilter::initXInput2()
 {
   const xcb_query_extension_reply_t *xinput =
       xcb_get_extension_data(_xcbConnection, &xcb_input_id);
-  if(!xinput || !xinput->present) {
+  if (!xinput || !xinput->present) {
     syslog(LOG_DEBUG, "DEBUG  XInput extension is not present on the X server");
     return false;
   }
@@ -143,7 +143,7 @@ EventFilter::initXInput2()
   auto cookie = xcb_input_xi_query_version(_xcbConnection, 2, 2);
   std::unique_ptr<xcb_input_xi_query_version_reply_t> reply(
       xcb_input_xi_query_version_reply(_xcbConnection, cookie, nullptr));
-  if(!reply || reply->major_version != 2) {
+  if (!reply || reply->major_version != 2) {
     syslog(LOG_DEBUG, "DEBUG  XInput extension is not present on the X server");
     return false;
   }

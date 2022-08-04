@@ -16,7 +16,7 @@ void detach()
   */
   if (getppid() == 1)
       return;
-  
+
   /* Ignore terminal stop signals */
 #ifdef SIGTTOU
   signal(SIGTTOU, SIG_IGN);
@@ -33,7 +33,7 @@ void detach()
    */
   if (fork() != 0)
       exit(0); /* parent */
-  
+
   /* child */
 
   /* Disassociate from controlling terminal and process group.
@@ -50,7 +50,7 @@ void detach()
    */
 #ifdef BSD
   setpgrp(0, getpid()); /* change process group */
-  
+
   int fd;
   if ((fd = open("/dev/tty", O_RDWR)) >= 0)
   {
@@ -59,11 +59,11 @@ void detach()
   }
 #else /* AT&T */
   setpgrp(); /* lose controlling terminal & change process group */
-  
+
   signal(SIGHUP, SIG_IGN); /* immune from pgrp leader death */
   if (fork() != 0)         /* become non-pgrp-leader */
       exit(0);             /* first child */
-  
+
   /* second child */
 #endif
 
@@ -74,49 +74,49 @@ void detach()
   return;
 }
 
-void setLogLevel( int level, bool isDaemon)
+void setLogLevel(int level, bool isDaemon)
 {
   int option = LOG_PID;
-  if( !isDaemon) option |= LOG_PERROR;
-  
+  if (!isDaemon) option |= LOG_PERROR;
+
   openlog("keylock-applet", option, LOG_USER);
-  switch( level)
+  switch (level)
   {
   case 1:
-    setlogmask( LOG_UPTO( LOG_NOTICE));
+    setlogmask(LOG_UPTO(LOG_NOTICE));
     break;
   case 2:
-    setlogmask( LOG_UPTO( LOG_INFO));
+    setlogmask(LOG_UPTO(LOG_INFO));
     break;
   case 3:
-    setlogmask( LOG_UPTO( LOG_DEBUG));
+    setlogmask(LOG_UPTO(LOG_DEBUG));
     break;
   default:
-    setlogmask( LOG_UPTO( LOG_WARNING));
+    setlogmask(LOG_UPTO(LOG_WARNING));
     break;
   }
 }
 
 void help()
 {
-  printf( "usage: keylock-applet [options]\n");
-  printf( "\n");
-  printf( "  short long         description\n");
-  printf( "  -d    --daemon     start as daemon\n");
-  printf( "  -h    --help       print this help and exit\n");
-  printf( "  -v N  --verbose N  set syslog verbosity level to N.\n");
-  printf( "                     Values of N can be:\n");
-  printf( "                        1  LOG_NOTICE\n");
-  printf( "                        2  LOG_INFO\n");
-  printf( "                        3  LOG_DEBUG\n");
+  printf("usage: keylock-applet [options]\n");
+  printf("\n");
+  printf("  short long         description\n");
+  printf("  -d    --daemon     start as daemon\n");
+  printf("  -h    --help       print this help and exit\n");
+  printf("  -v N  --verbose N  set syslog verbosity level to N.\n");
+  printf("                     Values of N can be:\n");
+  printf("                        1  LOG_NOTICE\n");
+  printf("                        2  LOG_INFO\n");
+  printf("                        3  LOG_DEBUG\n");
 }
 
-void parseCommandLine( int argc, char** argv)
+void parseCommandLine(int argc, char** argv)
 {
   bool daemon = false;
   int verbosity = 0;
   int c = 0;
-  while( true)
+  while (true)
   {
     static struct option long_options[] =
         {
@@ -125,20 +125,20 @@ void parseCommandLine( int argc, char** argv)
             {"verbose", required_argument, 0, 'v'},
             {0, 0, 0, 0},
         };
-    
+
     int option_index = 0;
-    c = getopt_long (argc, argv, "dhv:", long_options, &option_index);
-    if( c == -1) break;
+    c = getopt_long(argc, argv, "dhv:", long_options, &option_index);
+    if (c == -1) break;
     switch (c)
     {
     case 0:
       /* If this option set a flag, do nothing else now. */
       if (long_options[option_index].flag != 0)
           break;
-      printf ("option %s", long_options[option_index].name);
+      printf("option %s", long_options[option_index].name);
       if (optarg)
           printf (" with arg %s", optarg);
-      printf ("\n");
+      printf("\n");
       break;
     case 'd':
         daemon = true;
@@ -155,17 +155,18 @@ void parseCommandLine( int argc, char** argv)
         break;
     }
   }
-  
 
-  if( daemon)    detach();
-  setLogLevel( verbosity, daemon);
-  
+
+  if (daemon)
+      detach();
+  setLogLevel(verbosity, daemon);
+
   if (optind < argc)
   {
-    printf ("unknown options: ");
+    printf("unknown options: ");
     while (optind < argc)
-        printf ("%s ", argv[optind++]);
-    putchar ('\n');
+        printf("%s ", argv[optind++]);
+    putchar('\n');
     help();
     abort();
   }
@@ -178,11 +179,11 @@ void cleanup()
 
 int main(int argc, char** argv)
 {
-  atexit( cleanup);
+  atexit(cleanup);
 
   parseCommandLine(argc, argv);
   IndicatorApplication a(argc, argv);
 
-  syslog( LOG_INFO, "INFO   Startup complete");
+  syslog(LOG_INFO, "INFO   Startup complete");
   return a.exec();
 }

@@ -13,7 +13,7 @@
 
 SplashScreen::SplashScreen()
         : QWidget()
-        , _color( "#33b0dc")
+        , _color("#33b0dc")
 {
   setAttribute(Qt::WA_TranslucentBackground);
   setWindowFlags(Qt::SplashScreen|Qt::WindowStaysOnTopHint);
@@ -21,9 +21,10 @@ SplashScreen::SplashScreen()
 }
 
 void
-SplashScreen::setText( const QString& text, const QFont& font)
+SplashScreen::setText(const QString& text, const QFont& font)
 {
-  syslog( LOG_DEBUG, "DEBUG  SplashScreen::setText: %s", text.toLatin1().constData());
+  syslog(LOG_DEBUG, "DEBUG  SplashScreen::setText: %s",
+         text.toLatin1().constData());
   _text = text;
   _font = font;
 }
@@ -31,31 +32,31 @@ SplashScreen::setText( const QString& text, const QFont& font)
 void
 SplashScreen::show()
 {
-  syslog( LOG_DEBUG, "DEBUG  SplashScreen::show");
+  syslog(LOG_DEBUG, "DEBUG  SplashScreen::show");
   updateGeometry();
 #ifdef Q_WS_X11
   unsigned long data = 0xFFFFFFFF;
-  XChangeProperty (QX11Info::display(),
-                   winId(),
-                   XInternAtom(QX11Info::display(), "_NET_WM_DESKTOP", False),
-                   XA_CARDINAL,
-                   32,
-                   PropModeReplace,
-                   reinterpret_cast<unsigned char *>(&data), // all desktop
-                   1);
+  XChangeProperty(QX11Info::display(),
+                  winId(),
+                  XInternAtom(QX11Info::display(), "_NET_WM_DESKTOP", False),
+                  XA_CARDINAL,
+                  32,
+                  PropModeReplace,
+                  reinterpret_cast<unsigned char *>(&data), // all desktop
+                  1);
 #endif
   QWidget::show();
-  syslog( LOG_DEBUG, "DEBUG  SplashScreen::show END");
+  syslog(LOG_DEBUG, "DEBUG  SplashScreen::show END");
 }
 
 void
-SplashScreen::paintEvent( QPaintEvent* event)
+SplashScreen::paintEvent(QPaintEvent* event)
 {
-  syslog( LOG_DEBUG, "DEBUG  SplashScreen::paintEvent");
+  syslog(LOG_DEBUG, "DEBUG  SplashScreen::paintEvent");
   QPainter p(this);
   p.setPen(_color);
   p.setFont(_font);
-  p.drawText( 0, 0, width(), height(),  Qt::AlignCenter, _text);
+  p.drawText(0, 0, width(), height(),  Qt::AlignCenter, _text);
   p.end();
   event->accept();
 }
@@ -67,9 +68,9 @@ SplashScreen::updateGeometry()
   QRect fr(fm.boundingRect(_text));
   int margin = 2, spacing=20;
   int w = fr.width()+2*spacing, h = fr.height()+2*spacing;
-  QRect sr( QApplication::primaryScreen()->availableGeometry());
+  QRect sr(QApplication::primaryScreen()->availableGeometry());
   int l=sr.width()-w-margin, t=sr.top()+margin;
-  setGeometry( l, t, w, h);
-  syslog( LOG_DEBUG, "DEBUG  SplashScreen::updateGeometry(): %d, %d, %d, %d",
-          l, t, w, h);
+  setGeometry(l, t, w, h);
+  syslog(LOG_DEBUG, "DEBUG  SplashScreen::updateGeometry(): %d, %d, %d, %d",
+         l, t, w, h);
 }
