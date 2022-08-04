@@ -27,19 +27,19 @@ DEFINES += INSTALL_PREFIX=\\\"$$PREFIX\\\"
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 # Input
-HEADERS += EventFilter.hh \
-           Indicator.hh \
-           IndicatorApplication.hh \
-           Preferences.hh \
-           Signal.hh \
-           SplashScreen.hh
-SOURCES += EventFilter.cc \
-           Indicator.cc \
-           IndicatorApplication.cc \
-           keylock-applet.cc \
-           Preferences.cc \
-           Signal.cc \
-           SplashScreen.cc
+HEADERS += src/EventFilter.hh \
+           src/Indicator.hh \
+           src/IndicatorApplication.hh \
+           src/Preferences.hh \
+           src/Signal.hh \
+           src/SplashScreen.hh
+SOURCES += src/EventFilter.cc \
+           src/Indicator.cc \
+           src/IndicatorApplication.cc \
+           src/keylock-applet.cc \
+           src/Preferences.cc \
+           src/Signal.cc \
+           src/SplashScreen.cc
 
 target.path = $$PREFIX/bin
 target.files = keylock-applet
