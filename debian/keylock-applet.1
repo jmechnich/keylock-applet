@@ -1,0 +1,42 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.\" (C) Copyright 2022 Joerg Mechnich <joerg@mechni.ch>,
+.\"
+.TH KEYLOCK-APPLET 1 "August  5 2022"
+.\" Please adjust this date whenever revising the manpage.
+.\"
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n+1 empty lines
+.\" for manpage-specific macros, see man(7)
+.SH NAME
+keylock-applet \- a Caps/Num/Scroll Lock system tray applet for X11, written in C++ and Qt
+.SH SYNOPSIS
+.B keylock-applet
+.RI [ options ]
+.SH DESCRIPTION
+.PP
+\fBkeylock-applet\fP shows the current status of lock keys in the system tray
+and as a splash screen if a lock key is active.
+.SH OPTIONS
+.TP
+.B \-h, \-\-help
+Show summary of options.
+.TP
+.B \-d, \-\-daemon
+Start as daemon
+.TP
+.B \-v N, \-\-verbose N
+Set syslog verbosity level to N.
+Values of N can be:
+.br
+1 LOG_NOTICE
+.br
+2 LOG_INFO
+.br
+3 LOG_DEBUG
