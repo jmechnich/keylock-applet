@@ -7,10 +7,7 @@ TEMPLATE = app
 CONFIG += link_pkgconfig
 TARGET = keylock-applet
 INCLUDEPATH += .
-PKGCONFIG += x11 x11-xcb xcb-xinput xcb-xkb
-CONFIG(debug, debug|release) {
-  PKGCONFIG += xcb-util
-}
+PKGCONFIG += x11 x11-xcb xcb-xinput xcb-xkb xcb-util
 QT += widgets x11extras
 
 isEmpty(PREFIX) {
