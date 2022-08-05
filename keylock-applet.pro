@@ -46,7 +46,18 @@ target.files = keylock-applet
 icons.path  = $$PREFIX/share/keylock-applet/icons
 icons.files = icons/*
 config.path = $$PREFIX/share/keylock-applet
-config.files = keylock-applet.conf
+config.files = misc/keylock-applet.conf
+desktop.path = $$PREFIX/share/applications
+desktop.files = misc/keylock-applet.desktop
+appicon.path = $$PREFIX/share/icons/hicolor/32x32
+appicon.files = misc/keylock-applet.png
+               
+INSTALLS += target icons config desktop appicon
 
-QMAKE_POST_LINK += $$QMAKE_STREAM_EDITOR -i 's,^icon_dir=.*,icon_dir=$$icons.path,'  $$config.files
-INSTALLS += target icons config
+# update icon_dir in config with PREFIX
+QMAKE_POST_LINK += $$QMAKE_STREAM_EDITOR -i 's,^icon_dir=.*,icon_dir=$$icons.path,'  misc/keylock-applet.conf
+
+# also remove OBJECTS_DIR with distclean
+extraclean.commands = rm -rf $$OBJECTS_DIR
+distclean.depends = extraclean
+QMAKE_EXTRA_TARGETS += distclean extraclean

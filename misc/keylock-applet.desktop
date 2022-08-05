@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=keylock-applet
+Comment=Caps/Num/Scroll Lock system tray applet
+Exec=keylock-applet
+Icon=keylock-applet
+Type=Application
+Categories=System;Monitor;Qt;
+Keywords=System;Utility
