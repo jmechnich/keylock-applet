@@ -60,7 +60,9 @@ private slots:
         {
           _sn->setEnabled(false);
           char tmp;
-          ::read(_fd[1], &tmp, sizeof(tmp));
+          if (::read(_fd[1], &tmp, sizeof(tmp)) < 0) {
+            // ignore error
+          }
           emit signal(_signum);
           _sn->setEnabled(true);
         }
@@ -83,7 +85,10 @@ private:
   static void handler(int signum)
         {
           char a = 1;
-          ::write(_fds[signum]->_fd[0], &a, sizeof(a));
+          // wrap call inside if to discard return value
+          if (::write(_fds[signum]->_fd[0], &a, sizeof(a)) < 0) {
+            // ignore error
+          }
         }
 
   int _signum;

@@ -66,11 +66,16 @@ void detach()
 
   /* second child */
 #endif
-
-  for (int fd = 0; fd < sysconf(_SC_OPEN_MAX); fd++)
-      close(fd); /* close all file descriptors */
-  chdir("/"); /* move current directory off mounted filesystem */
-  umask(0);   /* clear any inherited file mode creation mask */
+  /* close all file descriptors */
+  for (int fd = 0; fd < sysconf(_SC_OPEN_MAX); fd++) {
+    close(fd);
+  }
+  /* move current directory off mounted filesystem */
+  if (chdir("/") < 0) {
+    // ignore error
+  }
+  /* clear any inherited file mode creation mask */
+  umask(0);
   return;
 }
 
