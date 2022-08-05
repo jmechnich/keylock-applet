@@ -58,6 +58,11 @@ INSTALLS += target icons config desktop appicon
 QMAKE_POST_LINK += $$QMAKE_STREAM_EDITOR -i 's,^icon_dir=.*,icon_dir=$$icons.path,'  misc/keylock-applet.conf
 
 # also remove OBJECTS_DIR with distclean
-extraclean.commands = rm -rf $$OBJECTS_DIR
+extraclean.commands = rm -rf $$OBJECTS_DIR debian/$$TARGET
 distclean.depends = extraclean
-QMAKE_EXTRA_TARGETS += distclean extraclean
+
+# additional targets for Debian packaging
+deb.commands = debian/rules clean; fakeroot debian/rules binary
+changelog.commands = gbp dch -Dunstable
+
+QMAKE_EXTRA_TARGETS += distclean extraclean deb changelog

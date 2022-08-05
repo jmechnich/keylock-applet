@@ -1,5 +1,5 @@
 Source: keylock-applet
-Section: unknown
+Section: utils
 Priority: optional
 Maintainer: Joerg Mechnich <joerg@mechni.ch>
 Build-Depends: debhelper-compat (= 13)
