@@ -1,4 +1,15 @@
-keylock-applet (0.1.1-2) unstable; urgency=medium
+keylock-applet (0.1.2) unstable; urgency=medium
+
+  [ jmechnich ]
+  * Update .gitignore, rename setting 'prefix' to 'icon_dir'
+  * Move default config to misc, add .desktop and appicon files
+  * Add man page, add missing debian/keylock-applet.substvars
+  * Add debian/manpages, update .gitignore
+  * Fix lintian warnings and errors, added make targets 'deb' and 'changelog'
+
+ -- Joerg Mechnich <joerg@mechni.ch>  Fri, 05 Aug 2022 21:00:41 +0200
+
+keylock-applet (0.1.1) unstable; urgency=medium
 
   [ jmechnich ]
   * initial commit
