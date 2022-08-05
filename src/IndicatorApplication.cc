@@ -148,11 +148,11 @@ IndicatorApplication::cleanup() const
 void
 IndicatorApplication::initSignalHandlers()
 {
-  const int sigs[] = { SIGINT, SIGTERM, SIGUSR1, SIGUSR2};
+  const int sigs[] = { SIGINT, SIGTERM, SIGUSR1, SIGUSR2 };
   for (size_t i=0; i < sizeof(sigs)/sizeof(sigs[0]); ++i)
   {
-  syslog(LOG_DEBUG, (std::string("DEBUG  Registering handler for ")
-                     + sys_siglist[sigs[i]]).c_str());
+    syslog(LOG_DEBUG, "DEBUG  Registering handler for %s",
+           sys_siglist[sigs[i]]);
     connect(Signal::create(sigs[i], this), SIGNAL(signal(int)),
             this, SLOT(handleSignal(int)));
   }
@@ -161,8 +161,7 @@ IndicatorApplication::initSignalHandlers()
 void
 IndicatorApplication::handleSignal(int signum)
 {
-  syslog(LOG_INFO, (std::string("INFO   Received ")
-                    + sys_siglist[signum]).c_str());
+  syslog(LOG_INFO, "INFO   Received %s", sys_siglist[signum]);
   switch (signum)
   {
   case SIGINT:
