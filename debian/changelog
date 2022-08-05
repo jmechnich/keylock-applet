@@ -1,0 +1,34 @@
+keylock-applet (0.1.1-2) unstable; urgency=medium
+
+  [ jmechnich ]
+  * initial commit
+  * fixed screenshot paths
+  * Update README.md
+  * various updates
+  * added .gitignore
+  * Cleaned up code
+  * Cleaned up code
+  * Updated screenshots
+  * Update README.md
+  * Update README.md
+  * Moved icons
+  * Properly install default settings
+  * Properly install default settings
+  * added logging to syslog, show splash on all desktops, added signal handling
+  * fixed nasty segfault due to using wrong QApplication signature
+  * encapsulate signal handlers
+  * fixed segfault at start when lock key is already on
+  * fixed bug where splash screen was not shown initialy on all desktops
+  * Use QScreen instead of QDesktopWidget
+  * Switch from QApplication::x11EventFilter to QAbstractNativeEventFilter
+  * Update project file for Qt5
+  * Complete new event handling, first version that works again
+  * Cleaned up coding style
+  * Update README, reorganize files
+  * Put build files into tmp directory
+  * Always link xcb-util
+  * Add LICENSE
+  * Simplify signal handler logging
+  * Fix compiler warnings
+
+ -- Joerg Mechnich <joerg@mechni.ch>  Fri, 05 Aug 2022 17:53:32 +0200

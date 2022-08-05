@@ -1,0 +1,15 @@
+Source: keylock-applet
+Section: unknown
+Priority: optional
+Maintainer: Joerg Mechnich <joerg@mechni.ch>
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.5.1
+Homepage: https://github.com/jmechnich/keylock-applet
+Rules-Requires-Root: no
+
+Package: keylock-applet
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Caps/Num/Scroll Lock system tray applet for X11, written in C++ and Qt
+ Shows a system tray icon with state of a single or all lock keys
+ Shows a splash screen if a lock key is active
