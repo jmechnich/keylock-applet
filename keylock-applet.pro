@@ -48,4 +48,5 @@ icons.files = icons/*
 config.path = $$PREFIX/share/keylock-applet
 config.files = keylock-applet.conf
 
+QMAKE_POST_LINK += $$QMAKE_STREAM_EDITOR -i 's,^icon_dir=.*,icon_dir=$$icons.path,'  $$config.files
 INSTALLS += target icons config

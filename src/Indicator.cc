@@ -40,9 +40,9 @@ Indicator::resetIcon()
   int show_key = _p->value("show_key").toInt();
   if (show_key != ANY)
   {
-    QString prefix = _p->value("prefix").toString();
+    QString iconDir = _p->value("icon_dir").toString();
     QString suffix = _p->value("suffix").toString();
-    QString iconPath = prefix + "/" +
+    QString iconPath = iconDir + "/" +
         iconName(show_key,_states[show_key]) + "." + suffix;
     _icon = QIcon(iconPath);
   } else {

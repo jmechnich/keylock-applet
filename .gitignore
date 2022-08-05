@@ -4,3 +4,7 @@
 /keylock-applet
 /tmp/
 *~
+/debian/.debhelper
+/debian/debhelper*
+/debian/files
+/debian/keylock-applet*

@@ -16,7 +16,7 @@ Preferences::Preferences()
   if (_s.status() != QSettings::NoError)
       printf("Error creating QSettings\n");
 
-  _map.insert("prefix", Item("icons", FolderDialog));
+  _map.insert("icon_dir", Item("icons", FolderDialog));
   _map.insert("suffix", Item("png", ComboBox, "png,svg"));
   _map.insert("show_key", Item(0, SpinBox, new QIntValidator(0, 3, this)));
   _map.insert("icon_font", Item(QFont(QFont().family(), 6), FontDialog));
